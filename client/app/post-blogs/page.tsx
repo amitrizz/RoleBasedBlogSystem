@@ -9,9 +9,9 @@ import Header from "../Header/page"
 
 export default function LoginPage() {
     const router = useRouter();
-    const [user, setUser] = useState({
-        email: "",
-        password: "",
+    const [blog, setBlog] = useState({
+        title: "",
+        content: "",
     })
     const [buttonDisabled, setButtonDisabled] = React.useState(false);
     const [isloading, setIsloading] = React.useState(false);
@@ -19,9 +19,18 @@ export default function LoginPage() {
     const onLogin = async () => {
         try {
             setIsloading(true);
-            const res = await axios.post("http://localhost:5000/api/user/login", user);
-            Cookies.set('token', res.data.token, { expires: 1, path: '/' }); // Expires in 1 day
-            router.push("/profile");
+            const token = Cookies.get("token");
+            const res = await axios.post("http://localhost:5000/api/blog/save-draft-blog", blog, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Add token to the Authorization header
+                },
+            });
+
+            if (res) {
+                setBlog({...blog, title: "", content: ""});
+                console.log(res);
+                alert(res.data.message);
+            }
 
         } catch (error) {
             console.log(error);
@@ -30,51 +39,50 @@ export default function LoginPage() {
             setIsloading(false);
         }
     }
-    const isAuthenticated = true;
 
     useEffect(() => {
-        if (user.email.length > 0 && user.password.length > 0) {
+        if (blog.title.length > 0 && blog.content.length > 0) {
             setButtonDisabled(false);
         } else {
             setButtonDisabled(true);
         }
-    }, [user])
+    }, [blog])
     return (
         <>
-        <Header />
+            <Header />
             <div className="flex items-center justify-center min-h-screen bg-gray-100">
                 <div className="w-full max-w-md p-8 bg-white rounded shadow-md">
                     <h1 className="text-2xl font-semibold text-center text-gray-800">
-                        {isloading ? "Processing" : "Login"}
+                        {isloading ? "Processing" : "Post a Blog"}
                     </h1>
 
                     <div className="mt-6">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                            Email
+                            Content
                         </label>
                         <input
                             className="w-full px-4 py-2 mt-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none focus:border-blue-500"
-                            type="email"
-                            name="email"
-                            id="email"
-                            value={user.email}
-                            onChange={(e) => setUser({ ...user, email: e.target.value })}
-                            placeholder="Email"
+                            type="text"
+                            name="content"
+                            id="content"
+                            value={blog.content}
+                            onChange={(e) => setBlog({ ...blog, content: e.target.value })}
+                            placeholder="Content"
                         />
                     </div>
 
                     <div className="mt-4">
                         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                            Password
+                            Title
                         </label>
                         <input
                             className="w-full px-4 py-2 mt-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none focus:border-blue-500"
-                            type="password"
-                            name="password"
-                            id="password"
-                            value={user.password}
-                            onChange={(e) => setUser({ ...user, password: e.target.value })}
-                            placeholder="Password"
+                            type="text"
+                            name="title"
+                            id="title"
+                            value={blog.title}
+                            onChange={(e) => setBlog({ ...blog, title: e.target.value })}
+                            placeholder="Title"
                         />
                     </div>
 
@@ -86,14 +94,8 @@ export default function LoginPage() {
                             }`}
                         onClick={onLogin}
                     >
-                        {buttonDisabled ? "No Signup" : "Login"}
+                        {buttonDisabled ? "No Data" : "Post Blog"}
                     </button>
-
-                    <div className="mt-4 text-center">
-                        <Link href="/signup" className="text-blue-500 hover:underline">
-                            Click To Signup Here
-                        </Link>
-                    </div>
                 </div>
             </div>
         </>

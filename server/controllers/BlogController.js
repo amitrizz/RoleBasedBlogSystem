@@ -26,7 +26,7 @@ class DashBoardController {
     static blogList = async (req, res, next) => {
         try {
             // console.log(skip);
-            const results = await BlogModel.find();
+            const results = await BlogModel.find({state:"published"});
             // console.log(results);
             res.send({ data: "data", result: results });
 
@@ -39,7 +39,7 @@ class DashBoardController {
     static detailBlog = async (req, res, next) => {
         try {
             const blogid = req.params['id'];
-            const results = await UserModel.findById(
+            const results = await BlogModel.findById(
                 blogid
             );
             res.send({ data: "data", result: results });
@@ -56,7 +56,7 @@ class DashBoardController {
             if (role !== 'editor') {
                 res.send({ error: "something is misssing in db" });
             }
-            const results = await DataModel.find({ state: 'under review' });
+            const results = await BlogModel.find({ state: 'under review' });
             res.send({ data: "data", result: results });
         }
         catch (error) {
@@ -64,22 +64,22 @@ class DashBoardController {
             res.send({ error: "something is misssing in db" })
         }
     }
-    static saveDraftBlog = async (req, res, next) => {
+    static saveDraftBlog = async (req, res) => {
         try {
             const user = req.user;
             const role = user['role'];
             if (role !== 'contributor') {
                 res.send({ error: "something is misssing in db" });
             }
-            const { content, title, userid } = req.body;
-            const newblog = new DataModel({
+            const { content, title } = req.body;
+            const newblog = new BlogModel({
                 content: content,
                 title: title,
-                author: userid,
+                author: user,
             });
             const blog = await newblog.save();
 
-            res.send({ data: "data", result: blog });
+            res.send({ message: "Submitted", result: blog });
 
         }
         catch (error) {
@@ -98,13 +98,22 @@ class DashBoardController {
             }
             // console.log(skip);
             const blogid = req.params['id'];
-            const {state}=req.body
-            const results = await UserModel.findByIdAndUpdate(
-                blogid,                // The user's _id (no need for { _id: id })
-                { $set: { state: state } }, // The update operation (set the role to newRole)
-                { new: true }      // Option to return the updated document
-            );
-            
+            const { status } = req.body
+
+            if (status === "Accept") {
+                const results = await BlogModel.findByIdAndUpdate(
+                    blogid,                // The user's _id (no need for { _id: id })
+                    { $set: { state: "published" } }, // The update operation (set the role to newRole)
+                    { new: true }      // Option to return the updated document
+                );
+            } else {
+                const results = await BlogModel.findByIdAndUpdate(
+                    blogid,                // The user's _id (no need for { _id: id })
+                    { $set: { state: "rejected" } }, // The update operation (set the role to newRole)
+                    { new: true }      // Option to return the updated document
+                );
+            }
+
             res.send({ data: "data", result: results });
 
         }
@@ -124,7 +133,7 @@ class DashBoardController {
             }
             // console.log(skip);
             const blogid = req.params['id'];
-            const results = await UserModel.findByIdAndUpdate(
+            const results = await BlogModel.findByIdAndUpdate(
                 blogid
             );
             res.send({ data: "data", result: results });

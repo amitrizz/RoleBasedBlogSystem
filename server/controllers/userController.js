@@ -165,7 +165,6 @@ class UserController {
     // get logged user details
     static loggedUser = async (req, res) => {
         return res.status(200).send({ status: "success", "user": req.user });
-
     }
 }
 export default UserController;

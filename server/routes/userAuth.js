@@ -11,9 +11,13 @@ userAuth.post('/register', userController.userResgistration);
 userAuth.post('/login', userController.userLogin);
 
 userAuth.post('/filter-users',checkUserAuthentication,userController.filterUser);
+userAuth.get('/logged-user',checkUserAuthentication,userController.loggedUser);
 // admin routes
 userAuth.put('/update-user/:id',checkUserAuthentication,userController.updateUser);
 userAuth.delete('/delete-user/:id',checkUserAuthentication, userController.deleteUser);
+
+
+
 
 
 export default userAuth;
