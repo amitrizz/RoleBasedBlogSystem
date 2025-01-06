@@ -11,7 +11,7 @@ const app = express();
 // cors policy
 app.use(cors());
 const PORT = process.env.PORT || 5000;
-const DATABASE_URL = process.env.DATABASE_URL || "mongodb+srv://amit:amit@cluster0.tysk0hr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const DATABASE_URL = process.env.DATABASE_URL
 
 
 // JSON 
